@@ -10,6 +10,7 @@
         <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
 
         <script src="./SecretSanta.js"></script>
+        <script src="./AmigoSecreto.js"></script>
 
         <style>
 
@@ -258,7 +259,6 @@
       }
 
       function success( pairings ) {
-
           var result = document.getElementById( 'result' );
 
           result.classList.remove( 'none' );
@@ -270,47 +270,43 @@
           table.className = 'result-table';
           result.appendChild( table );
 
-          var names = Object.keys( pairings ).sort();
+        var sortedPairs = pairings.sort((a, b) => a.name > b.name ? 1 : -1);
 
-          for ( var t = 0, T = names.length; t < T; ++ t ) {
+        sortedPairs.forEach(pair => {
+            var prettyName = pair.name.replace(/\([^)]+\)/g, ' ').replace(/ +/g, ' ').trim();
 
-              var name = names[ t ];
-              var prettyName = names[ t ].replace( /\([^)]+\)/g, ' ' ).replace( / +/g, ' ' ).trim();
+            var tr = document.createElement('tr');
+            tr.className = 'result-row';
+            table.appendChild(tr);
 
-              var tr = document.createElement( 'tr' );
-              tr.className = 'result-row';
-              table.appendChild( tr );
+            var tdName = document.createElement('td');
+            tdName.className = 'result-name';
+            tr.appendChild(tdName);
 
-              var tdName = document.createElement( 'td' );
-              tdName.className = 'result-name';
-              tr.appendChild( tdName );
+            var tdLink = document.createElement('td');
+            tdLink.className = 'result-link';
+            tr.appendChild(tdLink);
 
-              var tdLink = document.createElement( 'td' );
-              tdLink.className = 'result-link';
-              tr.appendChild( tdLink );
+            var link = document.createElement('a');
+            tdLink.appendChild(link);
 
-              var link = document.createElement( 'a' );
-              tdLink.appendChild( link );
+            var key = String(_.random(0x0000, 0xFFFF));
+            var encryptedPairing = CryptoJS.AES.encrypt(pair.friend, key);
 
-              var key = String( _.random( 0x0000, 0xFFFF ) );
-              var encryptedPairing = CryptoJS.AES.encrypt( pairings[ name ], key );
+            var pairingPath = window.location.pathname.replace(/[^/]+$/, '') + 'pairing.html';
+            var pairingQueryString = '?name=' + encodeURIComponent(prettyName) + '&key=' + encodeURIComponent(key) + '&pairing=' + encodeURIComponent(encryptedPairing);
 
-              var pairingPath = window.location.pathname.replace( /[^/]+$/, '' ) + 'pairing.html';
-              var pairingQueryString = '?name=' + encodeURIComponent( prettyName ) + '&key=' + encodeURIComponent( key ) + '&pairing=' + encodeURIComponent( encryptedPairing );
+            if (isAmazonEnabled())
+                pairingQueryString += '&extra=1';
 
-              if ( isAmazonEnabled() )
-                  pairingQueryString += '&extra=1';
+            tdName.innerText = pair.name;
 
-              tdName.innerText = name;
-
-              link.addEventListener( 'click', protect );
-              link.setAttribute( 'data-name', name );
-              link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
-              link.target = '_blank';
-              link.innerText = link.href;
-
-          }
-
+            link.addEventListener('click', protect);
+            link.setAttribute('data-name', pair.name);
+            link.href = window.location.protocol + '//' + window.location.host + pairingPath + pairingQueryString;
+            link.target = '_blank';
+            link.innerText = link.href;
+        });
       }
 
       function updateAmazon() {
@@ -362,41 +358,11 @@
           if ( lines.length === 0 || lines.length === 1 && lines[ 0 ].length === 0 )
               return reset();
 
-          var santa = new SecretSanta();
-
-          for ( var t = 0, T = lines.length; t < T; ++ t ) {
-
-              var match = lines[ t ].match( /^((?:(?![!=]).)+)((?: [!=](?:(?! [!=]).)+)*)$/ );
-
-              if ( ! match )
-                  return error( 'Syntax error: "' + lines[ t ] + '" isn\'t valid' );
-
-              var name = match[ 1 ];
-              var rules = match[ 2 ] ? match[ 2 ].match(/[!=][^!=]+/g) : null;
-
-              var person = santa.add( name );
-
-              if (rules) {
-
-                  for ( var u = 0, U = rules.length; u < U; ++ u ) {
-
-                      var fnName = {
-
-                          '=': 'enforce',
-                          '!': 'blacklist'
-
-                      }[ rules[ u ].charAt( 0 ) ];
-
-                      person[ fnName ]( rules[ u ].slice( 1 ).trim() );
-
-                  }
-
-              }
-
-          }
-
+            var nameList = lines;
+              var amigoSecreto = new AmigoSecreto(nameList);
+              var resultado = amigoSecreto.generatePairs();
           try {
-              return success( santa.generate() );
+              return success(resultado);
           } catch ( err ) {
             console.error(err.stack)
               return error( err.message );
