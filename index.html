@@ -4,7 +4,7 @@
     <head>
 
         <meta charset="utf-8" />
-        <title>Secret Santa Generator</title>
+        <title>Gerador de Amigo Secreto</title>
 
         <script src="vendors/Lodash-3.10.1.js"></script>
         <script src="vendors/Cryptojs.aes-3.1.2.js"></script>
@@ -21,41 +21,32 @@
 
             <div class="part" style="overflow-y: auto">
                 <div class="instructions">
-                    <h1><img src="assets/mistletoe.png" style="vertical-align: middle" /> Secret Santa Generator</h1>
-                    <p>No signup, no email, no bullshit. Just a straightforward <a href="https://github.com/arcanis/secretsanta">open-source</a> tool to help you generate your secret santa pairings. One static page, and that's it.</p>
-                    <p>In the most common case (no exclusion rules, pair each guest with another at random), enter the name of your guests one line at a time. Once done, press "generate" and you're all set: send the generated links to your guests (by mail, chat, whatever floats your boat) and their pairing will be revealed to them (and only them) once they open the link.</p>
-                    <h2>Where does this tool come from?</h2>
-                    <p>I wanted to make a Secret Santa over Facebook without having to reveal to anyone my guests email addresses (so nothing that would require a backend). I also wanted not to know who was paired with me, so I had to find a way to somehow obfuscate the information. And being a developer, well, my first thought was "Let's AES it, for fun and profits!". Classic.</p>
+                    <h1>Gerador de Amigo Secreto</h1>
+                    <p>Uma ferramenta <a href="https://github.com/dmodena/secretsanta" target="_blank">open-source</a> para ajudar a gerar os pares de amigos secretos. Uma página estática, e só.</p>
+                    <p>Preencha o nome dos participantes, um em cada linha. Ao terminar, clique em "Gerar Pares", e envie os links para os
+                        participantes (por email, mensagem, como preferir) e seus amigos secretos serão revelados apenas para eles assim que
+                        clicarem em seus links.</p>
+                    <h2>De onde vem essa ferramenta?</h2>
+                    <p>Este site é baseado no trabalho de <a href="https://github.com/arcanis/secretsanta" target="_blank">arcanis</a>. Todo o sistema de sorteio foi modificado, e a página traduzida
+                        para o português por Douglas Modena.</p>
                 </div>
             </div>
 
             <form id="form" class="part">
                 <textarea id="input" class="input" autofocus></textarea>
-                <button type="submit" class="generate">Generate your pairings</button>
+                <button type="submit" class="generate">Gerar Pares</button>
                 <div id="result" class="result none"></div>
             </form>
 
         </div>
 
         <script id="input-placeholder" type="text/placeholder">
-            # You can add a user by adding a line
-            Santa
+            # Adicione um participante por linha
+            Fulano
+            Beltrano
+            Ciclano
 
-            # You can add some details if you want to, using parentheses after the name
-            Nicholas (the elf)
-
-            # You can prevent someone from being paired with someone else
-            Maël !Aurélie
-            Aurélie !Maël
-
-            # You can also exclude someone from being paired with multiple people
-            # Careful: too many exclusion rules can make your secret santa less interesting!
-            Rudolph !Santa !Nicholas (the elf)
-
-            # You can also cheat a bit and force someone to be paired with another
-            Nicholas (the saint) =Nicholas (the elf)
-
-            ...
+            # Ao final, basta clicar em "Gerar Pares", e o sorteio será feito
         </script>
 
     </body>
@@ -217,7 +208,8 @@
 
         function protect(e) {
             var name = e.currentTarget.getAttribute('data-name');
-            var warningMessage = 'If you click this link, you will be revealed ' + name + '\'s pairing! Are you sure you want to do this? Only do this if you\'re actually ' + name + '.\n\nUse right-click to copy the link target instead.';
+            var warningMessage =
+                `Ao clicar neste link, o amigo secreto de ${name} será revelado! Deseja mesmo fazer isso? Somente prossiga caso você realmente seja ${name}. Caso contrário, clique com o botão direito para copiar o link.`;
 
             if (!confirm(warningMessage)) {
                 e.preventDefault();
