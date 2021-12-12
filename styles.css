@@ -59,6 +59,7 @@ body {
     font-size: 40px;
     background-color: #EA1212;
     color: #FFFFFF;
+    cursor: pointer;
 }
 
 .generate:focus {
